@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Meu Financeiro</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#64748b;--line:#e5e7eb;--green:#15803d;--red:#dc2626;--blue:#2563eb;--nav:#0f172a}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:var(--bg);color:var(--text);padding-bottom:88px}
+header{background:var(--nav);color:white;padding:calc(18px + env(safe-area-inset-top)) 18px 20px;border-radius:0 0 24px 24px}
+h1{font-size:25px;margin:0 0 4px}.sub{opacity:.72;font-size:13px}.balance{font-size:36px;font-weight:750;margin:20px 0 8px}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini{background:rgba(255,255,255,.09);padding:12px;border-radius:14px}.mini b{display:block;font-size:17px;margin-top:4px}.mini span{font-size:12px;opacity:.7}
+main{padding:16px;max-width:700px;margin:auto}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.title{font-weight:700}.muted{color:var(--muted);font-size:13px}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick button,.primary{border:0;border-radius:16px;padding:15px;font-weight:700;font-size:15px;background:#eef2ff;color:#1e3a8a}.quick .expense{background:#fee2e2;color:#991b1b}.quick .income{background:#dcfce7;color:#166534}
+button{font:inherit;cursor:pointer}.primary{background:var(--blue);color:white;width:100%;margin-top:8px}.danger{background:#fee2e2;color:#991b1b;border:0;border-radius:10px;padding:7px 10px}
+input,select{width:100%;padding:13px;border:1px solid #dbe1ea;border-radius:12px;background:white;font-size:16px}label{font-size:12px;color:var(--muted);display:block;margin:10px 0 5px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+.modal{position:fixed;inset:0;background:rgba(2,6,23,.5);display:none;align-items:end;z-index:10}.sheet{background:white;width:100%;border-radius:24px 24px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}.modal.open{display:flex}
+.tx{padding:12px 0;border-bottom:1px solid var(--line)}.tx:last-child{border:0}.amount.income{color:var(--green)}.amount.expense{color:var(--red)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(15px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 8px calc(9px + env(safe-area-inset-bottom));z-index:5}.nav button{border:0;background:none;color:#64748b;font-size:11px}.nav button.active{color:var(--blue);font-weight:700}.nav i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}
+.hidden{display:none}.pill{padding:5px 9px;border-radius:999px;background:#f1f5f9;font-size:12px}
+.bar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--blue);border-radius:99px}
+.empty{text-align:center;color:var(--muted);padding:22px 8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Meu Financeiro</h1><div class="sub" id="monthLabel"></div>
+  <div class="balance" id="balance">R$ 0,00</div>
+  <div class="summary"><div class="mini"><span>Receitas</span><b id="income">R$ 0,00</b></div><div class="mini"><span>Despesas</span><b id="expense">R$ 0,00</b></div></div>
+</header>
+<main id="app"></main>
+<nav class="nav">
+<button data-page="home" class="active"><i>⌂</i>Início</button>
+<button data-page="transactions"><i>☷</i>Lançamentos</button>
+<button data-page="budget"><i>◔</i>Orçamento</button>
+<button data-page="settings"><i>⚙</i>Ajustes</button>
+</nav>
+
+<div class="modal" id="modal"><div class="sheet">
+<div class="row"><h2 id="modalTitle">Novo lançamento</h2><button class="danger" onclick="closeModal()">Fechar</button></div>
+<div class="grid">
+<div><label>Tipo</label><select id="type"><option value="expense">Despesa</option><option value="income">Receita</option></select></div>
+<div><label>Valor</label><input id="amount" inputmode="decimal" placeholder="0,00"></div>
+<div><label>Categoria</label><select id="category"></select></div>
+<div><label>Data</label><input id="date" type="date"></div>
+<div><label>Forma</label><select id="method"><option>Pix</option><option>Débito</option><option>Crédito</option><option>Dinheiro</option><option>Transferência</option><option>Outro</option></select></div>
+<div><label>Recorrência</label><select id="repeat"><option value="none">Não repetir</option><option value="monthly">Todo mês</option><option value="weekly">Toda semana</option><option value="yearly">Todo ano</option></select></div>
+<div class="full"><label>Descrição</label><input id="desc" placeholder="Ex.: Mercado"></div>
+</div>
+<button class="primary" onclick="saveTx()">Salvar lançamento</button>
+</div></div>
+
+<script>
+const KEY="meu-financeiro-v1";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"tx":[],"budget":3000,"categories":["Moradia","Alimentação","Transporte","Saúde","Educação","Lazer","Compras","Contas","Salário","Outros"]}');
+let page="home";
+const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const today=()=>new Date().toISOString().slice(0,10);
+const month=new Date().toISOString().slice(0,7);
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function current(){return db.tx.filter(t=>t.date.startsWith(month))}
+function totals(){let t=current();return {inc:t.filter(x=>x.type==="income").reduce((a,x)=>a+x.amount,0),exp:t.filter(x=>x.type==="expense").reduce((a,x)=>a+x.amount,0)}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function render(){const t=totals();document.getElementById("monthLabel").textContent=new Date().toLocaleDateString("pt-BR",{month:"long",year:"numeric"});document.getElementById("balance").textContent=brl(t.inc-t.exp);document.getElementById("income").textContent=brl(t.inc);document.getElementById("expense").textContent=brl(t.exp);
+document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));document.getElementById("app").innerHTML=page==="home"?home():page==="transactions"?transactions():page==="budget"?budget():settings()}
+function home(){let t=current().slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);return `<section class="card"><div class="title">Lançamento rápido</div><div class="quick" style="margin-top:12px"><button class="expense" onclick="openModal('expense')">− Nova despesa</button><button class="income" onclick="openModal('income')">＋ Nova receita</button></div></section><section class="card"><div class="row"><div class="title">Resumo do mês</div><span class="pill">${current().length} lançamentos</span></div><div style="margin-top:15px"><div class="row muted"><span>Despesas</span><b>${brl(totals().exp)}</b></div><div class="bar" style="margin:8px 0 14px"><i style="width:${Math.min(100,(totals().exp/Math.max(db.budget,1))*100)}%"></i></div><div class="row muted"><span>Orçamento</span><b>${brl(db.budget)}</b></div></div></section><section class="card"><div class="title">Últimos lançamentos</div>${t.length?t.map(txRow).join(""):`<div class="empty">Nenhum lançamento ainda.<br>Use um dos botões acima.</div>`}</section>`}
+function txRow(t){return `<div class="tx row"><div><b>${esc(t.desc||t.category)}</b><div class="muted">${esc(t.category)} · ${new Date(t.date+"T12:00").toLocaleDateString("pt-BR")}${t.repeat!=="none"?" · ↻":""}</div></div><div class="amount ${t.type}">${t.type==="income"?"+":"−"} ${brl(t.amount)}</div></div>`}
+function transactions(){let t=db.tx.slice().sort((a,b)=>b.date.localeCompare(a.date));return `<section class="card"><div class="row"><div class="title">Todos os lançamentos</div><button class="primary" style="width:auto;margin:0;padding:10px 14px" onclick="openModal()">＋</button></div>${t.length?t.map(txRow).join(""):`<div class="empty">Nenhum lançamento.</div>`}</section>`}
+function budget(){let spent=totals().exp,pct=Math.min(100,spent/Math.max(db.budget,1)*100);return `<section class="card"><div class="title">Orçamento mensal</div><p class="muted">Defina quanto você pretende gastar no mês.</p><label>Limite mensal</label><input id="budgetInput" inputmode="decimal" value="${db.budget.toFixed(2).replace(".",",")}"><button class="primary" onclick="setBudget()">Salvar orçamento</button><div style="margin-top:18px"><div class="row"><span>Usado</span><b>${brl(spent)} / ${brl(db.budget)}</b></div><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div></section><section class="card"><div class="title">Automação</div><p class="muted">Lançamentos recorrentes são identificados com ↻. Nesta versão, você pode cadastrar contas mensais e usar o botão de duplicação manual na próxima abertura.</p></section>`}
+function settings(){return `<section class="card"><div class="title">Categorias</div><p class="muted">${db.categories.map(esc).join(" · ")}</p></section><section class="card"><div class="title">Dados</div><p class="muted">Tudo fica salvo localmente neste iPhone. Não há integração bancária.</p><button class="primary" onclick="exportData()">Exportar backup</button><button class="primary" style="background:#64748b" onclick="importData()">Importar backup</button><input id="file" type="file" accept=".json" class="hidden" onchange="readImport(event)"></section>`}
+function setBudget(){let v=parseFloat(document.getElementById("budgetInput").value.replace(",", "."));if(v>=0){db.budget=v;save()}}
+function openModal(type="expense"){document.getElementById("modal").classList.add("open");document.getElementById("type").value=type;document.getElementById("date").value=today();document.getElementById("amount").value="";document.getElementById("desc").value="";document.getElementById("repeat").value="none";document.getElementById("category").innerHTML=db.categories.map(c=>`<option>${esc(c)}</option>`).join("");}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+function saveTx(){let amount=parseFloat(document.getElementById("amount").value.replace(/\./g,"").replace(",", "."));if(!amount||amount<=0)return alert("Informe um valor válido.");db.tx.push({id:Date.now(),type:document.getElementById("type").value,amount,category:document.getElementById("category").value,date:document.getElementById("date").value,method:document.getElementById("method").value,repeat:document.getElementById("repeat").value,desc:document.getElementById("desc").value.trim()});closeModal();save()}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="meu-financeiro-backup.json";a.click()}
+function importData(){document.getElementById("file").click()}
+function readImport(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert("Backup importado.")}catch{alert("Arquivo inválido.")}};r.readAsText(f)}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{page=b.dataset.page;render()});
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+render();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')} 
+</script>
+</body>
+</html>
