@@ -1,7 +1,7 @@
 {
   "name": "Meu Financeiro",
   "short_name": "Financeiro",
-  "description": "Controle pessoal de contas, bens, despesas e parcelas.",
+  "description": "Controle financeiro pessoal com categorias detalhadas, contas personalizadas, parcelas e backup.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
