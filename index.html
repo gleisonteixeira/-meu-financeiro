@@ -17,18 +17,35 @@
 <header><h1>Meu Financeiro</h1><p>Suas contas, bens e parcelas em um só lugar.</p></header>
 <main class="wrap">
 <nav class="tabs" aria-label="Seções">
-<button class="tab active" data-tab="inicio">Resumo</button><button class="tab" data-tab="lancamentos">Despesas</button><button class="tab" data-tab="parcelas">Parcelas</button><button class="tab" data-tab="contas">Contas e bens</button><button class="tab" data-tab="backup">Backup</button>
+<button class="tab active" data-tab="inicio">Resumo</button><button class="tab" data-tab="receitas">Receitas</button><button class="tab" data-tab="lancamentos">Despesas</button><button class="tab" data-tab="parcelas">Parcelas</button><button class="tab" data-tab="contas">Contas e bens</button><button class="tab" data-tab="backup">Backup</button>
 </nav>
 <section id="inicio" class="panel active">
 <div class="monthrow"><label for="mes" style="margin:0">Mês de referência</label><input type="month" id="mes"></div>
 <div class="cards">
-<div class="metric"><div class="label">Despesas lançadas no mês</div><div class="num" id="mDespesas">R$ 0,00</div></div>
+<div class="metric"><div class="label">Receitas do mês</div><div class="num" id="mReceitas">R$ 0,00</div></div><div class="metric"><div class="label">Despesas lançadas no mês</div><div class="num" id="mDespesas">R$ 0,00</div></div><div class="metric"><div class="label">Saldo do mês</div><div class="num" id="mSaldo">R$ 0,00</div></div>
 <div class="metric"><div class="label">Parcelas vencendo no mês</div><div class="num" id="mVencer">R$ 0,00</div></div>
 <div class="metric"><div class="label">Total em aberto</div><div class="num" id="mAberto">R$ 0,00</div></div>
 <div class="metric"><div class="label">Próximos 30 dias</div><div class="num" id="m30">R$ 0,00</div></div>
 </div>
 <div class="section"><h2>Próximos vencimentos</h2><div id="proximas"></div></div>
 <div class="section"><h2>Despesas por conta ou bem</h2><div id="porConta"></div></div>
+</section>
+<section id="receitas" class="panel">
+<div class="box">
+<h2 style="margin:0 0 12px">Nova receita</h2>
+<form id="formReceita">
+<div class="formgrid">
+<div class="field full"><label for="receitaDescricao">Origem da receita</label><input id="receitaDescricao" required maxlength="100" placeholder="Ex.: salário, aluguel recebido, serviço"></div>
+<div class="field"><label for="receitaCategoria">Categoria</label><select id="receitaCategoria"><option>Salário</option><option>Trabalho autônomo</option><option>Renda de aluguel</option><option>Investimentos</option><option>Reembolso</option><option>Venda de bem</option><option>Benefícios</option><option>Outros</option></select></div>
+<div class="field"><label for="receitaConta">Conta ou destino</label><select id="receitaConta"><option value="">Não especificado</option></select></div>
+<div class="field"><label for="receitaValor">Valor recebido (R$)</label><input id="receitaValor" required type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="5000,00"></div>
+<div class="field"><label for="receitaData">Data de recebimento</label><input id="receitaData" required type="date"></div>
+<div class="field full"><label for="receitaObs">Observações (opcional)</label><input id="receitaObs" maxlength="120" placeholder="Ex.: salário de outubro"></div>
+</div>
+<div class="actions"><button type="submit">Salvar receita</button><button type="reset" class="secondary">Limpar</button></div>
+</form>
+</div>
+<div class="section"><h2>Receitas cadastradas</h2><div class="box"><label for="buscaReceita">Buscar receita</label><input id="buscaReceita" placeholder="Ex.: salário, aluguel"></div><div id="listaReceitas"></div></div>
 </section>
 <section id="lancamentos" class="panel">
 <div class="box">
@@ -80,8 +97,8 @@ const thisMonth=()=>today().slice(0,7);
 const money=c=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(c)||0)/100);
 const cents=v=>Math.round(Number(v)*100);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let db={accounts:[],expenses:[]};
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.accounts)&&Array.isArray(x.expenses))db=x}catch(e){}}
+let db={accounts:[],expenses:[],incomes:[]};
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.accounts)&&Array.isArray(x.expenses)){db=x;if(!Array.isArray(db.incomes))db.incomes=[]}}catch(e){}}
 function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
 function addMonths(date,n){const [y,m,d]=date.split('-').map(Number);const target=new Date(y,m-1+n,1);const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();return `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,'0')}-${String(Math.min(d,last)).padStart(2,'0')}`}
 function dateBR(s){if(!s)return '—';return s.split('-').reverse().join('/')}
@@ -91,12 +108,15 @@ function isOverdue(p){return !p.paid&&p.due<today()}
 function fillSelects(){
  const opts=db.accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
  $('contaDespesa').innerHTML='<option value="">Sem conta específica</option>'+opts;
+ $('receitaConta').innerHTML='<option value="">Não especificado</option>'+opts;
  $('filtroConta').innerHTML='<option value="todas">Todas as contas</option>'+opts;
 }
 function render(){
  fillSelects();
  const month=$('mes').value||thisMonth();
  const expensesThis=db.expenses.filter(e=>e.date.startsWith(month)).reduce((s,e)=>s+e.total,0);
+ const incomesThis=(db.incomes||[]).filter(e=>e.date.startsWith(month)).reduce((s,e)=>s+e.amount,0);
+ $('mReceitas').textContent=money(incomesThis);$('mSaldo').textContent=money(incomesThis-expensesThis);
  const inst=allInst();
  const dueMonth=inst.filter(p=>p.due.startsWith(month)&&!p.paid).reduce((s,p)=>s+p.amount,0);
  const open=inst.filter(p=>!p.paid).reduce((s,p)=>s+p.amount,0);
@@ -111,6 +131,9 @@ function render(){
  const term=($('buscaDespesa')?.value||'').trim().toLocaleLowerCase('pt-BR');
  const filteredExpenses=db.expenses.filter(e=>[e.description,e.category,e.accountName,e.payment].join(' ').toLocaleLowerCase('pt-BR').includes(term));
  $('listaDespesas').innerHTML=filteredExpenses.length?[...filteredExpenses].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="item"><div class="itemtop"><div><h3>${esc(e.description)}</h3><div class="muted">${esc(e.accountName||'Sem conta específica')} · ${esc(e.category)} · ${dateBR(e.date)}</div><div class="muted">${esc(e.payment)}${e.card?' · '+esc(e.card):''} · ${e.installments.length} parcela(s)</div></div><div class="amount">${money(e.total)}</div></div><div class="actions"><button class="secondary small" onclick="toggleDetails('${e.id}')">Ver parcelas</button><button class="danger small" onclick="deleteExpense('${e.id}')">Excluir</button></div><div id="details-${e.id}" class="hidden"></div></div>`).join(''):'<div class="listempty">'+(term?'Nenhuma despesa encontrada para essa busca.':'Nenhuma despesa cadastrada.')+'</div>';
+ const termIncome=($('buscaReceita')?.value||'').trim().toLocaleLowerCase('pt-BR');
+ const filteredIncome=(db.incomes||[]).filter(e=>[e.description,e.category,e.accountName,e.notes].join(' ').toLocaleLowerCase('pt-BR').includes(termIncome));
+ $('listaReceitas').innerHTML=filteredIncome.length?[...filteredIncome].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="item"><div class="itemtop"><div><h3>${esc(e.description)}</h3><div class="muted">${esc(e.category)} · ${dateBR(e.date)}${e.accountName?' · '+esc(e.accountName):''}</div>${e.notes?`<div class="muted">${esc(e.notes)}</div>`:''}</div><strong class="amount">${money(e.amount)}</strong></div><div class="actions"><button class="danger small" onclick="deleteIncome('${e.id}')">Excluir</button></div></div>`).join(''):'<div class="listempty">'+(termIncome?'Nenhuma receita encontrada.':'Nenhuma receita cadastrada.')+'</div>';
  renderInstallments();
  $('listaContas').innerHTML=db.accounts.length?db.accounts.map(a=>{const total=db.expenses.filter(e=>e.accountId===a.id).reduce((s,e)=>s+e.total,0);const outstanding=allInst().filter(p=>p.expense.accountId===a.id&&!p.paid).reduce((s,p)=>s+p.amount,0);return `<div class="item"><div class="itemtop"><div><h3>${esc(a.name)}</h3><div class="muted">Despesas lançadas: ${money(total)} · Em aberto: ${money(outstanding)}</div></div><button class="danger small" onclick="deleteAccount('${a.id}')">Excluir</button></div></div>`}).join(''):'<div class="listempty">Ainda não há contas ou bens. Adicione um nome acima.</div>';
 }
@@ -133,6 +156,11 @@ $('mes').addEventListener('change',render);$('buscaDespesa').addEventListener('i
 $('pagamento').addEventListener('change',()=>$('cartaoField').classList.toggle('hidden',$('pagamento').value!=='Cartão de crédito'));
 $('categoria').addEventListener('change',()=> $('categoriaCustomField').classList.toggle('hidden',$('categoria').value!=='__custom'));
 
+$('receitaData').value=today();
+$('formReceita').addEventListener('submit',ev=>{ev.preventDefault();const amount=cents($('receitaValor').value),date=$('receitaData').value;if(amount<=0||!date){alert('Confira o valor e a data da receita.');return}const acc=db.accounts.find(a=>a.id===$('receitaConta').value);db.incomes.push({id:crypto.randomUUID(),description:$('receitaDescricao').value.trim(),category:$('receitaCategoria').value,accountId:acc?.id||'',accountName:acc?.name||'',amount,date,notes:$('receitaObs').value.trim()});$('receitaDescricao').value='';$('receitaValor').value='';$('receitaObs').value='';$('receitaData').value=today();save();alert('Receita salva com sucesso!')});
+$('formReceita').addEventListener('reset',()=>setTimeout(()=>$('receitaData').value=today(),0));
+$('buscaReceita').addEventListener('input',render);
+window.deleteIncome=id=>{if(confirm('Excluir esta receita?')){db.incomes=db.incomes.filter(e=>e.id!==id);save()}};
 $('formConta').addEventListener('submit',ev=>{ev.preventDefault();const name=$('nomeConta').value.trim();if(!name)return;if(db.accounts.some(a=>a.name.toLowerCase()===name.toLowerCase())){alert('Já existe uma conta com esse nome.');return}db.accounts.push({id:crypto.randomUUID(),name});$('nomeConta').value='';save()});
 $('formDespesa').addEventListener('submit',ev=>{ev.preventDefault();const total=cents($('valor').value),n=Number($('nParcelas').value),date=$('dataCompra').value,first=$('primeiroVenc').value;if(total<=0||!Number.isInteger(n)||n<1||n>240||!date||!first||($('categoria').value==='__custom'&&!$('categoriaCustom').value.trim())){alert('Confira o valor, as datas e a quantidade de parcelas.');return}const acc=db.accounts.find(a=>a.id===$('contaDespesa').value);const base=Math.floor(total/n),remainder=total-base*n;const installments=Array.from({length:n},(_,i)=>({amount:base+(i<remainder?1:0),due:addMonths(first,i),paid:false,paidAt:null}));db.expenses.push({id:crypto.randomUUID(),description:$('descricao').value.trim(),category:$('categoria').value==='__custom'?$('categoriaCustom').value.trim():$('categoria').value,accountId:acc?.id||'',accountName:acc?.name||'',total,date,payment:$('pagamento').value,card:$('pagamento').value==='Cartão de crédito'?$('cartao').value.trim():'',installments});$('descricao').value='';$('valor').value='';$('nParcelas').value='1';$('cartao').value='';$('categoriaCustom').value='';$('categoriaCustomField').classList.add('hidden');$('categoria').selectedIndex=0;$('dataCompra').value=today();$('primeiroVenc').value=today();save();alert('Despesa salva com sucesso!')});
 $('formDespesa').addEventListener('reset',()=>setTimeout(()=>{$('dataCompra').value=today();$('primeiroVenc').value=today();$('cartaoField').classList.add('hidden')},0));
