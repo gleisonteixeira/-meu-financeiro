@@ -3,91 +3,133 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#153e35">
+<meta name="description" content="Controle pessoal de contas, bens, despesas e parcelas.">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Meu Financeiro</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#64748b;--line:#e5e7eb;--green:#15803d;--red:#dc2626;--blue:#2563eb;--nav:#0f172a}
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:var(--bg);color:var(--text);padding-bottom:88px}
-header{background:var(--nav);color:white;padding:calc(18px + env(safe-area-inset-top)) 18px 20px;border-radius:0 0 24px 24px}
-h1{font-size:25px;margin:0 0 4px}.sub{opacity:.72;font-size:13px}.balance{font-size:36px;font-weight:750;margin:20px 0 8px}
-.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini{background:rgba(255,255,255,.09);padding:12px;border-radius:14px}.mini b{display:block;font-size:17px;margin-top:4px}.mini span{font-size:12px;opacity:.7}
-main{padding:16px;max-width:700px;margin:auto}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.title{font-weight:700}.muted{color:var(--muted);font-size:13px}
-.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick button,.primary{border:0;border-radius:16px;padding:15px;font-weight:700;font-size:15px;background:#eef2ff;color:#1e3a8a}.quick .expense{background:#fee2e2;color:#991b1b}.quick .income{background:#dcfce7;color:#166534}
-button{font:inherit;cursor:pointer}.primary{background:var(--blue);color:white;width:100%;margin-top:8px}.danger{background:#fee2e2;color:#991b1b;border:0;border-radius:10px;padding:7px 10px}
-input,select{width:100%;padding:13px;border:1px solid #dbe1ea;border-radius:12px;background:white;font-size:16px}label{font-size:12px;color:var(--muted);display:block;margin:10px 0 5px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
-.modal{position:fixed;inset:0;background:rgba(2,6,23,.5);display:none;align-items:end;z-index:10}.sheet{background:white;width:100%;border-radius:24px 24px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}.modal.open{display:flex}
-.tx{padding:12px 10px;border-bottom:1px solid var(--line)}.tx.installment{background:#fff7ed;border-left:4px solid #f59e0b;border-radius:10px;margin:6px 0}.installment-badge{display:inline-block;background:#ffedd5;color:#9a3412;border-radius:7px;padding:3px 6px;font-size:11px;font-weight:800;margin-top:4px}.account-badge{display:inline-block;background:#e0e7ff;color:#3730a3;border-radius:7px;padding:3px 6px;font-size:11px;margin-top:4px}.tx:last-child{border:0}.amount.income{color:var(--green)}.amount.expense{color:var(--red)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(15px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 8px calc(9px + env(safe-area-inset-bottom));z-index:5}.nav button{border:0;background:none;color:#64748b;font-size:11px}.nav button.active{color:var(--blue);font-weight:700}.nav i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}
-.hidden{display:none}.pill{padding:5px 9px;border-radius:999px;background:#f1f5f9;font-size:12px}
-.bar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--blue);border-radius:99px}
-.empty{text-align:center;color:var(--muted);padding:22px 8px}
+:root{--green:#153e35;--green2:#216454;--cream:#f5f7f4;--ink:#18231f;--muted:#64716b;--line:#dce4df;--red:#b33d35;--orange:#a85c12;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{background:var(--green);color:white;padding:22px 18px 18px;border-radius:0 0 22px 22px}header h1{font-size:25px;margin:0 0 5px}header p{margin:0;color:#d4e4dc;font-size:14px}.wrap{max-width:900px;margin:auto;padding:14px 14px 42px}.tabs{display:flex;gap:8px;overflow:auto;margin:0 0 14px;padding:3px 0}.tab{border:1px solid var(--line);background:white;border-radius:12px;padding:10px 13px;white-space:nowrap;font-weight:650;color:var(--green)}.tab.active{background:var(--green);color:white;border-color:var(--green)}.panel{display:none}.panel.active{display:block}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}.metric .label{color:var(--muted);font-size:12px;line-height:1.3}.metric .num{font-weight:800;font-size:20px;margin-top:8px;overflow-wrap:anywhere}.section{margin-top:18px}.section h2{font-size:18px;margin:0 0 10px}.box{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field{min-width:0}.field.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:650;margin-bottom:5px;color:#34463e}input,select,textarea{width:100%;padding:11px 10px;border:1px solid #cbd6cf;border-radius:10px;background:white;color:var(--ink);font:inherit;font-size:15px;min-width:0}input[type=checkbox]{width:auto}button{border:0;border-radius:11px;padding:11px 14px;background:var(--green);color:white;font-weight:700;font-size:14px;cursor:pointer}button.secondary{background:#e8efeb;color:var(--green)}button.danger{background:#f9e9e7;color:var(--red)}button.small{padding:8px 10px;font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.muted{color:var(--muted);font-size:13px}.item{background:white;border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:9px}.itemtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.item h3{font-size:15px;margin:0 0 5px;overflow-wrap:anywhere}.amount{font-weight:800;white-space:nowrap}.pill{display:inline-block;padding:4px 7px;border-radius:7px;background:#e8efeb;color:var(--green);font-size:11px;font-weight:750}.pill.red{background:#fae7e5;color:var(--red)}.pill.orange{background:#fff0d9;color:var(--orange)}.listempty{padding:20px;text-align:center;color:var(--muted);background:white;border:1px dashed var(--line);border-radius:14px}.monthrow{display:flex;gap:8px;align-items:center;margin-bottom:12px}.monthrow input{max-width:190px}.installment{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid #edf1ee;padding:10px 0}.installment:first-child{border-top:0}.installment .left{min-width:0}.installment .left strong{display:block;font-size:14px}.installment .left small{color:var(--muted)}.installment .right{text-align:right;flex-shrink:0}.installment .right strong{display:block}.hidden{display:none!important}.notice{padding:11px;border-radius:10px;background:#eef4f0;color:#355449;font-size:13px;margin-bottom:12px}footer{text-align:center;color:var(--muted);font-size:12px;margin-top:26px}@media(min-width:650px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.formgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:390px){.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.metric .num{font-size:18px}}
 </style>
 </head>
 <body>
-<header>
-  <h1>Meu Financeiro</h1><div class="sub" id="monthLabel"></div>
-  <div class="balance" id="balance">R$ 0,00</div>
-  <div class="summary"><div class="mini"><span>Receitas</span><b id="income">R$ 0,00</b></div><div class="mini"><span>Despesas</span><b id="expense">R$ 0,00</b></div></div>
-</header>
-<main id="app"></main>
-<nav class="nav">
-<button data-page="home" class="active"><i>⌂</i>Início</button>
-<button data-page="transactions"><i>☷</i>Lançamentos</button>
-<button data-page="budget"><i>◔</i>Orçamento</button>
-<button data-page="settings"><i>⚙</i>Ajustes</button>
+<header><h1>Meu Financeiro</h1><p>Suas contas, bens e parcelas em um só lugar.</p></header>
+<main class="wrap">
+<nav class="tabs" aria-label="Seções">
+<button class="tab active" data-tab="inicio">Resumo</button><button class="tab" data-tab="lancamentos">Despesas</button><button class="tab" data-tab="parcelas">Parcelas</button><button class="tab" data-tab="contas">Contas e bens</button><button class="tab" data-tab="backup">Backup</button>
 </nav>
-
-<div class="modal" id="modal"><div class="sheet">
-<div class="row"><h2 id="modalTitle">Novo lançamento</h2><button class="danger" onclick="closeModal()">Fechar</button></div>
-<div class="grid">
-<div><label>Tipo</label><select id="type"><option value="expense">Despesa</option><option value="income">Receita</option></select></div>
-<div><label>Valor total da compra</label><input id="amount" inputmode="decimal" placeholder="0,00"></div>
-<div><label>Categoria</label><select id="category"></select></div>
-<div><label>Data</label><input id="date" type="date"></div>
-<div><label>Forma</label><select id="method"><option>Pix</option><option>Débito</option><option>Crédito</option><option>Dinheiro</option><option>Transferência</option><option>Outro</option></select></div>
-<div><label>Recorrência</label><select id="repeat"><option value="none">Não repetir</option><option value="monthly">Todo mês</option><option value="weekly">Toda semana</option><option value="yearly">Todo ano</option></select></div>
-<div><label>Conta / bem</label><select id="account"><option value="Geral">Geral</option><option value="Sítio">Sítio</option><option value="Veículo L200">Veículo L200</option><option value="Moto tipo 1">Moto tipo 1</option><option value="Moto tipo 2">Moto tipo 2</option></select></div>
-<div><label>Parcelas</label><input id="installments" type="number" min="1" max="48" value="1" inputmode="numeric"></div>
-<div class="full muted" id="installmentHint">Use 1 para compra à vista. Para compra parcelada, informe o total de parcelas e o app criará os meses seguintes.</div>
-<div class="full"><label>Descrição</label><input id="desc" placeholder="Ex.: Mercado / compra do veículo"></div>
+<section id="inicio" class="panel active">
+<div class="monthrow"><label for="mes" style="margin:0">Mês de referência</label><input type="month" id="mes"></div>
+<div class="cards">
+<div class="metric"><div class="label">Despesas lançadas no mês</div><div class="num" id="mDespesas">R$ 0,00</div></div>
+<div class="metric"><div class="label">Parcelas vencendo no mês</div><div class="num" id="mVencer">R$ 0,00</div></div>
+<div class="metric"><div class="label">Total em aberto</div><div class="num" id="mAberto">R$ 0,00</div></div>
+<div class="metric"><div class="label">Próximos 30 dias</div><div class="num" id="m30">R$ 0,00</div></div>
 </div>
-<button class="primary" onclick="saveTx()">Salvar lançamento</button>
-</div></div>
-
+<div class="section"><h2>Próximos vencimentos</h2><div id="proximas"></div></div>
+<div class="section"><h2>Despesas por conta ou bem</h2><div id="porConta"></div></div>
+</section>
+<section id="lancamentos" class="panel">
+<div class="box">
+<h2 style="margin:0 0 12px">Nova despesa</h2>
+<form id="formDespesa">
+<div class="formgrid">
+<div class="field full"><label for="descricao">O que foi pago ou comprado?</label><input id="descricao" required maxlength="100" placeholder="Ex.: seguro da L200, mensalidade do clube"></div>
+<div class="field"><label for="categoria">Categoria</label><select id="categoria"><option>Veículo</option><option>Moradia</option><option>Alimentação</option><option>Saúde</option><option>Lazer</option><option>Impostos e taxas</option><option>Assinaturas</option><option>Financiamento</option><option>Outros</option></select></div>
+<div class="field"><label for="contaDespesa">Conta ou bem</label><select id="contaDespesa"></select></div>
+<div class="field"><label for="valor">Valor total (R$)</label><input id="valor" required type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="1200,00"></div>
+<div class="field"><label for="dataCompra">Data da despesa</label><input id="dataCompra" required type="date"></div>
+<div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento"><option>Pix</option><option>Dinheiro</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Boleto</option><option>Financiamento</option><option>Transferência</option><option>Outro</option></select></div>
+<div class="field hidden" id="cartaoField"><label for="cartao">Nome do cartão</label><input id="cartao" maxlength="50" placeholder="Ex.: Nubank, Itaú"></div>
+<div class="field"><label for="nParcelas">Quantidade de parcelas</label><input id="nParcelas" type="number" min="1" max="240" value="1" required></div>
+<div class="field"><label for="primeiroVenc">Vencimento da 1ª parcela</label><input id="primeiroVenc" required type="date"></div>
+<div class="field full muted">O valor total será dividido automaticamente. Você poderá marcar cada parcela como paga.</div>
+</div>
+<div class="actions"><button type="submit">Salvar despesa</button><button type="reset" class="secondary">Limpar</button></div>
+</form>
+</div>
+<div class="section"><h2>Despesas cadastradas</h2><div id="listaDespesas"></div></div>
+</section>
+<section id="parcelas" class="panel">
+<div class="box"><div class="formgrid"><div class="field"><label for="filtroStatus">Situação</label><select id="filtroStatus"><option value="todas">Todas</option><option value="abertas">Em aberto</option><option value="pagas">Pagas</option><option value="vencidas">Vencidas</option></select></div><div class="field"><label for="filtroConta">Conta ou bem</label><select id="filtroConta"></select></div></div></div>
+<div id="listaParcelas"></div>
+</section>
+<section id="contas" class="panel">
+<div class="box"><h2 style="margin:0 0 12px">Adicionar conta ou bem</h2><p class="muted">Use qualquer nome: L200, S10, moto, sítio, clube de tiro, imóvel, conta de luz ou o que precisar.</p><form id="formConta"><div class="field"><label for="nomeConta">Nome</label><input id="nomeConta" required maxlength="60" placeholder="Ex.: Clube de tiro"></div><div class="actions"><button type="submit">Adicionar</button></div></form></div>
+<div id="listaContas"></div>
+</section>
+<section id="backup" class="panel">
+<div class="box"><h2 style="margin:0 0 8px">Backup dos seus dados</h2><p class="muted">Exporte uma cópia para guardar nos Arquivos do iPhone. Para recuperar, importe um backup JSON salvo anteriormente.</p><div class="actions"><button id="exportar">Exportar backup</button><button id="importarBtn" class="secondary">Importar backup</button><input id="arquivoBackup" type="file" accept="application/json,.json" class="hidden"></div><p class="muted">Os dados ficam neste navegador. Exportar um backup regularmente ajuda a evitar perdas se você trocar de aparelho ou limpar os dados do Safari.</p></div>
+<div class="box"><h2 style="margin:0 0 8px">Como usar no iPhone</h2><ol class="muted"><li>Abra o endereço do app no Safari.</li><li>Toque em Compartilhar.</li><li>Escolha “Adicionar à Tela de Início”.</li><li>Abra pelo ícone criado.</li></ol></div>
+</section>
+<footer>Meu Financeiro · Seus dados ficam no seu aparelho</footer>
+</main>
 <script>
-const KEY="meu-financeiro-v1";
-let db=JSON.parse(localStorage.getItem(KEY)||'{"tx":[],"budget":3000,"categories":["Moradia","Alimentação","Transporte","Saúde","Educação","Lazer","Compras","Contas","Salário","Outros"]}');
-let page="home";
-const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const today=()=>new Date().toISOString().slice(0,10);
-const month=new Date().toISOString().slice(0,7);
+const KEY='meuFinanceiro_v3';
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const thisMonth=()=>today().slice(0,7);
+const money=c=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(c)||0)/100);
+const cents=v=>Math.round(Number(v)*100);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let db={accounts:[],expenses:[]};
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.accounts)&&Array.isArray(x.expenses))db=x}catch(e){}}
 function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
-function current(){return db.tx.filter(t=>t.date.startsWith(month))}
-function totals(){let t=current();return {inc:t.filter(x=>x.type==="income").reduce((a,x)=>a+x.amount,0),exp:t.filter(x=>x.type==="expense").reduce((a,x)=>a+x.amount,0)}}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function render(){const t=totals();document.getElementById("monthLabel").textContent=new Date().toLocaleDateString("pt-BR",{month:"long",year:"numeric"});document.getElementById("balance").textContent=brl(t.inc-t.exp);document.getElementById("income").textContent=brl(t.inc);document.getElementById("expense").textContent=brl(t.exp);
-document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));document.getElementById("app").innerHTML=page==="home"?home():page==="transactions"?transactions():page==="budget"?budget():settings()}
-function home(){let t=current().slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);return `<section class="card"><div class="title">Lançamento rápido</div><div class="quick" style="margin-top:12px"><button class="expense" onclick="openModal('expense')">− Nova despesa</button><button class="income" onclick="openModal('income')">＋ Nova receita</button></div></section><section class="card"><div class="row"><div class="title">Resumo do mês</div><span class="pill">${current().length} lançamentos</span></div><div style="margin-top:15px"><div class="row muted"><span>Despesas</span><b>${brl(totals().exp)}</b></div><div class="bar" style="margin:8px 0 14px"><i style="width:${Math.min(100,(totals().exp/Math.max(db.budget,1))*100)}%"></i></div><div class="row muted"><span>Orçamento</span><b>${brl(db.budget)}</b></div></div></section><section class="card"><div class="row"><div class="title">Parcelas deste mês</div><span class="pill">${current().filter(x=>x.installmentTotal>1).length} previstas</span></div>${current().filter(x=>x.installmentTotal>1).length?current().filter(x=>x.installmentTotal>1).sort((a,b)=>a.date.localeCompare(b.date)).map(txRow).join(""):`<div class="muted" style="margin-top:8px">Nenhuma compra parcelada registrada para este mês.</div>`}</section><section class="card"><div class="title">Últimos lançamentos</div>${t.length?t.map(txRow).join(""):`<div class="empty">Nenhum lançamento ainda.<br>Use um dos botões acima.</div>`}</section>`}
-function txRow(t){const inst=t.installmentTotal>1;return `<div class="tx row ${inst?"installment":""}"><div style="min-width:0"><b>${esc(t.desc||t.category)}</b><div class="muted">${esc(t.category)} · ${new Date(t.date+"T12:00").toLocaleDateString("pt-BR")}${t.repeat&&t.repeat!=="none"?" · ↻":""}</div>${t.account&&t.account!=="Geral"?`<div><span class="account-badge">${esc(t.account)}</span></div>`:""}${inst?`<div><span class="installment-badge">Parcela ${t.installmentNumber} de ${t.installmentTotal}</span></div>`:""}</div><div class="amount ${t.type}" style="white-space:nowrap">${t.type==="income"?"+":"−"} ${brl(t.amount)}</div></div>`}
-function transactions(){let t=db.tx.slice().sort((a,b)=>b.date.localeCompare(a.date));return `<section class="card"><div class="row"><div class="title">Todos os lançamentos</div><button class="primary" style="width:auto;margin:0;padding:10px 14px" onclick="openModal()">＋</button></div>${t.length?t.map(txRow).join(""):`<div class="empty">Nenhum lançamento.</div>`}</section>`}
-function budget(){let spent=totals().exp,pct=Math.min(100,spent/Math.max(db.budget,1)*100);return `<section class="card"><div class="title">Orçamento mensal</div><p class="muted">Defina quanto você pretende gastar no mês.</p><label>Limite mensal</label><input id="budgetInput" inputmode="decimal" value="${db.budget.toFixed(2).replace(".",",")}"><button class="primary" onclick="setBudget()">Salvar orçamento</button><div style="margin-top:18px"><div class="row"><span>Usado</span><b>${brl(spent)} / ${brl(db.budget)}</b></div><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div></section><section class="card"><div class="title">Automação</div><p class="muted">Lançamentos recorrentes são identificados com ↻. Nesta versão, você pode cadastrar contas mensais e usar o botão de duplicação manual na próxima abertura.</p></section>`}
-function settings(){return `<section class="card"><div class="title">Contas / bens</div><p class="muted">Sítio · Veículo L200 · Moto tipo 1 · Moto tipo 2 · Geral</p><p class="muted">Escolha uma conta ao cadastrar a despesa para identificar em qual bem ou compromisso ela se encaixa.</p></section><section class="card"><div class="title">Categorias</div><p class="muted">${db.categories.map(esc).join(" · ")}</p></section><section class="card"><div class="title">Dados</div><p class="muted">Tudo fica salvo localmente neste iPhone. Não há integração bancária.</p><button class="primary" onclick="exportData()">Exportar backup</button><button class="primary" style="background:#64748b" onclick="importData()">Importar backup</button><input id="file" type="file" accept=".json" class="hidden" onchange="readImport(event)"></section>`}
-function setBudget(){let v=parseFloat(document.getElementById("budgetInput").value.replace(",", "."));if(v>=0){db.budget=v;save()}}
-function openModal(type="expense"){document.getElementById("modal").classList.add("open");document.getElementById("type").value=type;document.getElementById("date").value=today();document.getElementById("amount").value="";document.getElementById("desc").value="";document.getElementById("repeat").value="none";document.getElementById("account").value="Geral";document.getElementById("installments").value="1";document.getElementById("category").innerHTML=db.categories.map(c=>`<option>${esc(c)}</option>`).join("");}
-function closeModal(){document.getElementById("modal").classList.remove("open")}
-function shiftMonth(dateStr,offset){const d=new Date(dateStr+"T12:00:00");const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+offset);const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function saveTx(){let amount=parseFloat(document.getElementById("amount").value.replace(/\./g,"").replace(",", "."));if(!amount||amount<=0)return alert("Informe um valor válido.");const date=document.getElementById("date").value;if(!date)return alert("Informe a data.");const total=Math.max(1,Math.min(48,parseInt(document.getElementById("installments").value||"1",10)));const type=document.getElementById("type").value;if(total>1&&type!=="expense")return alert("Parcelamento está disponível para despesas. Para receitas, use 1 parcela.");const group=total>1?"parc-"+Date.now():null;const totalCents=Math.round(amount*100);const common={type,category:document.getElementById("category").value,method:document.getElementById("method").value,repeat:document.getElementById("repeat").value,desc:document.getElementById("desc").value.trim(),account:document.getElementById("account").value};for(let i=1;i<=total;i++){const installmentCents=Math.floor(totalCents/total)+(i<=totalCents%total?1:0);db.tx.push({id:Date.now()+i,...common,amount:installmentCents/100,date:shiftMonth(date,i-1),installmentGroup:group,installmentNumber:i,installmentTotal:total});}closeModal();save();if(total>1)alert("Compra parcelada cadastrada: as "+total+" parcelas foram distribuídas pelos meses seguintes.") }
-function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="meu-financeiro-backup.json";a.click()}
-function importData(){document.getElementById("file").click()}
-function readImport(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert("Backup importado.")}catch{alert("Arquivo inválido.")}};r.readAsText(f)}
-document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{page=b.dataset.page;render()});
-document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
-render();
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')} 
+function addMonths(date,n){const [y,m,d]=date.split('-').map(Number);const target=new Date(y,m-1+n,1);const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();return `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,'0')}-${String(Math.min(d,last)).padStart(2,'0')}`}
+function dateBR(s){if(!s)return '—';return s.split('-').reverse().join('/')}
+function isPaid(inst){return inst.paid===true}
+function allInst(){return db.expenses.flatMap(e=>e.installments.map((p,i)=>({...p,expenseId:e.id,expense:e,idx:i})))}
+function isOverdue(p){return !p.paid&&p.due<today()}
+function fillSelects(){
+ const opts=db.accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+ $('contaDespesa').innerHTML='<option value="">Sem conta específica</option>'+opts;
+ $('filtroConta').innerHTML='<option value="todas">Todas as contas</option>'+opts;
+}
+function render(){
+ fillSelects();
+ const month=$('mes').value||thisMonth();
+ const expensesThis=db.expenses.filter(e=>e.date.startsWith(month)).reduce((s,e)=>s+e.total,0);
+ const inst=allInst();
+ const dueMonth=inst.filter(p=>p.due.startsWith(month)&&!p.paid).reduce((s,p)=>s+p.amount,0);
+ const open=inst.filter(p=>!p.paid).reduce((s,p)=>s+p.amount,0);
+ const end=new Date();end.setDate(end.getDate()+30);const endS=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
+ const next30=inst.filter(p=>!p.paid&&p.due>=today()&&p.due<=endS).reduce((s,p)=>s+p.amount,0);
+ $('mDespesas').textContent=money(expensesThis);$('mVencer').textContent=money(dueMonth);$('mAberto').textContent=money(open);$('m30').textContent=money(next30);
+ const upcoming=inst.filter(p=>!p.paid&&p.due>=today()).sort((a,b)=>a.due.localeCompare(b.due)).slice(0,8);
+ $('proximas').innerHTML=upcoming.length?upcoming.map(p=>`<div class="item"><div class="itemtop"><div><h3>${esc(p.expense.description)}</h3><div class="muted">${esc(p.expense.accountName||'Sem conta')} · parcela ${p.idx+1}/${p.expense.installments.length} · vence ${dateBR(p.due)}</div></div><div class="amount">${money(p.amount)}</div></div></div>`).join(''):'<div class="listempty">Nenhum vencimento futuro em aberto.</div>';
+ const by={};db.expenses.forEach(e=>{const name=e.accountName||'Sem conta específica';by[name]=(by[name]||0)+e.total});
+ const keys=Object.keys(by).sort((a,b)=>by[b]-by[a]);
+ $('porConta').innerHTML=keys.length?keys.map(k=>`<div class="item"><div class="itemtop"><h3>${esc(k)}</h3><strong class="amount">${money(by[k])}</strong></div></div>`).join(''):'<div class="listempty">Cadastre uma despesa para ver o resumo.</div>';
+ $('listaDespesas').innerHTML=db.expenses.length?[...db.expenses].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="item"><div class="itemtop"><div><h3>${esc(e.description)}</h3><div class="muted">${esc(e.accountName||'Sem conta específica')} · ${esc(e.category)} · ${dateBR(e.date)}</div><div class="muted">${esc(e.payment)}${e.card?' · '+esc(e.card):''} · ${e.installments.length} parcela(s)</div></div><div class="amount">${money(e.total)}</div></div><div class="actions"><button class="secondary small" onclick="toggleDetails('${e.id}')">Ver parcelas</button><button class="danger small" onclick="deleteExpense('${e.id}')">Excluir</button></div><div id="details-${e.id}" class="hidden"></div></div>`).join(''):'<div class="listempty">Nenhuma despesa cadastrada.</div>';
+ renderInstallments();
+ $('listaContas').innerHTML=db.accounts.length?db.accounts.map(a=>{const total=db.expenses.filter(e=>e.accountId===a.id).reduce((s,e)=>s+e.total,0);const outstanding=allInst().filter(p=>p.expense.accountId===a.id&&!p.paid).reduce((s,p)=>s+p.amount,0);return `<div class="item"><div class="itemtop"><div><h3>${esc(a.name)}</h3><div class="muted">Despesas lançadas: ${money(total)} · Em aberto: ${money(outstanding)}</div></div><button class="danger small" onclick="deleteAccount('${a.id}')">Excluir</button></div></div>`}).join(''):'<div class="listempty">Ainda não há contas ou bens. Adicione um nome acima.</div>';
+}
+function renderInstallments(){
+ const status=$('filtroStatus').value,account=$('filtroConta').value;
+ let rows=allInst().filter(p=>account==='todas'||p.expense.accountId===account);
+ if(status==='abertas')rows=rows.filter(p=>!p.paid);
+ if(status==='pagas')rows=rows.filter(p=>p.paid);
+ if(status==='vencidas')rows=rows.filter(isOverdue);
+ rows.sort((a,b)=>a.due.localeCompare(b.due));
+ $('listaParcelas').innerHTML=rows.length?rows.map(p=>`<div class="item"><div class="itemtop"><div><h3>${esc(p.expense.description)}</h3><div class="muted">${esc(p.expense.accountName||'Sem conta')} · ${esc(p.expense.payment)} · parcela ${p.idx+1}/${p.expense.installments.length}</div><div style="margin-top:6px"><span class="pill ${p.paid?'':isOverdue(p)?'red':'orange'}">${p.paid?'Paga':isOverdue(p)?'Vencida':'Em aberto'}</span> <span class="muted">Vencimento: ${dateBR(p.due)}</span></div></div><div class="amount">${money(p.amount)}</div></div><div class="actions">${p.paid?`<button class="secondary small" onclick="markPaid('${p.expenseId}',${p.idx},false)">Desmarcar paga</button>`:`<button class="small" onclick="markPaid('${p.expenseId}',${p.idx},true)">Marcar como paga</button>`}</div></div>`).join(''):'<div class="listempty">Nenhuma parcela para este filtro.</div>';
+}
+window.toggleDetails=id=>{const e=db.expenses.find(x=>x.id===id);const el=$('details-'+id);if(!e||!el)return;if(!el.classList.contains('hidden')){el.classList.add('hidden');return}el.innerHTML=e.installments.map((p,i)=>`<div class="installment"><div class="left"><strong>${i+1}/${e.installments.length} · ${dateBR(p.due)}</strong><small>${p.paid?'Paga':isOverdue(p)?'Vencida':'Em aberto'}</small></div><div class="right"><strong>${money(p.amount)}</strong><button class="${p.paid?'secondary':''} small" onclick="markPaid('${e.id}',${i},${!p.paid})">${p.paid?'Desmarcar':'Marcar paga'}</button></div></div>`).join('');el.classList.remove('hidden')};
+window.markPaid=(id,i,value)=>{const e=db.expenses.find(x=>x.id===id);if(e&&e.installments[i]){e.installments[i].paid=value;e.installments[i].paidAt=value?today():null;save()}};
+window.deleteExpense=id=>{if(confirm('Excluir esta despesa e todas as suas parcelas?')){db.expenses=db.expenses.filter(e=>e.id!==id);save()}};
+window.deleteAccount=id=>{const a=db.accounts.find(x=>x.id===id);if(!a)return;if(db.expenses.some(e=>e.accountId===id)){alert('Esta conta tem despesas vinculadas. Exclua ou altere essas despesas antes de excluir a conta.');return}if(confirm('Excluir a conta ou bem "'+a.name+'"?')){db.accounts=db.accounts.filter(x=>x.id!==id);save()}};
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));}));
+$('mes').value=thisMonth();$('dataCompra').value=today();$('primeiroVenc').value=today();
+$('mes').addEventListener('change',render);$('filtroStatus').addEventListener('change',renderInstallments);$('filtroConta').addEventListener('change',renderInstallments);
+$('pagamento').addEventListener('change',()=>$('cartaoField').classList.toggle('hidden',$('pagamento').value!=='Cartão de crédito'));
+$('formConta').addEventListener('submit',ev=>{ev.preventDefault();const name=$('nomeConta').value.trim();if(!name)return;if(db.accounts.some(a=>a.name.toLowerCase()===name.toLowerCase())){alert('Já existe uma conta com esse nome.');return}db.accounts.push({id:crypto.randomUUID(),name});$('nomeConta').value='';save()});
+$('formDespesa').addEventListener('submit',ev=>{ev.preventDefault();const total=cents($('valor').value),n=Number($('nParcelas').value),date=$('dataCompra').value,first=$('primeiroVenc').value;if(total<=0||!Number.isInteger(n)||n<1||n>240||!date||!first){alert('Confira o valor, as datas e a quantidade de parcelas.');return}const acc=db.accounts.find(a=>a.id===$('contaDespesa').value);const base=Math.floor(total/n),remainder=total-base*n;const installments=Array.from({length:n},(_,i)=>({amount:base+(i<remainder?1:0),due:addMonths(first,i),paid:false,paidAt:null}));db.expenses.push({id:crypto.randomUUID(),description:$('descricao').value.trim(),category:$('categoria').value,accountId:acc?.id||'',accountName:acc?.name||'',total,date,payment:$('pagamento').value,card:$('pagamento').value==='Cartão de crédito'?$('cartao').value.trim():'',installments});$('descricao').value='';$('valor').value='';$('nParcelas').value='1';$('cartao').value='';$('dataCompra').value=today();$('primeiroVenc').value=today();save();alert('Despesa salva com sucesso!')});
+$('formDespesa').addEventListener('reset',()=>setTimeout(()=>{$('dataCompra').value=today();$('primeiroVenc').value=today();$('cartaoField').classList.add('hidden')},0));
+$('exportar').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'Meu Financeiro',version:3,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='meu-financeiro-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+$('importarBtn').addEventListener('click',()=>$('arquivoBackup').click());
+$('arquivoBackup').addEventListener('change',async ev=>{const f=ev.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());const data=x.data||x;if(!Array.isArray(data.accounts)||!Array.isArray(data.expenses))throw Error();if(confirm('Importar substituirá os dados atuais. Deseja continuar?')){db=data;save();alert('Backup importado.')} }catch(e){alert('Não foi possível importar. Escolha um backup JSON válido do Meu Financeiro.')}ev.target.value=''});
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+load();render();
 </script>
 </body>
 </html>
